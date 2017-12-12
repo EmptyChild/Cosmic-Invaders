@@ -1,0 +1,141 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+@font-face {
+  font-family: 'PixelarRegular';
+  src: url("../fonts/PixelarRegular.otf");
+}
+a {
+  color: inherit;
+  text-decoration: none;
+
+}
+.wrapper {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.b-header {
+  background-image: url("../assets/menu-background.jpg");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  height: 720px;
+  &__navbar {
+    height: 100px;
+    display: grid;
+    grid-template-columns: 4fr 2fr 6fr;
+    align-items: center;
+    justify-content: start;
+    
+  }
+  &__logo {
+    font-family: 'PixelarRegular', sans-serif;
+    font-size: 48px;
+    color: white;
+    text-shadow: black 0 0 20px;
+    margin: 0;
+  }
+  &__nav {
+    width: 100%;
+    color: lightgray;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    grid-column: 3/4;
+    &-links {
+      font-size: 16px;
+      list-style-type: none;
+      display: flex;
+      justify-content: space-between;
+    }
+    &-link {
+      cursor: pointer;
+      &:hover {
+        color: goldenrod;
+      }
+    }
+  }
+  &__headling {
+    height: 620px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-shadow: black 0 0 20px;
+    &--main {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 96px;
+      font-weight: bold;
+      margin: 0;
+    }
+    &--secondary {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 32px;
+    }
+  }
+}
+
+.b-section {
+  margin-bottom: 50px;
+  &__header {
+    margin-bottom: 30px;
+  }
+  &__headling--main {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+  }
+  &__headling--secondary {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    text-align: center;    
+    margin: 0;
+  }
+  &__content {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  &__content--developer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  &__image {    
+    margin: 15px;
+  }
+  &__image--screenshot {
+    width: 320px;
+    height: 180px;
+  }
+  &__image--my-pic {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+  }
+}
+
+.b-section--game-container {
+  min-height: 300px;  
+  background-color: #eee;
+  &__content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  &__play-button {
+    height: 50px;
+    width: 100px;
+    color: white;
+    background-color: #30339d;
+    border: none;
+    font-family: 'PixelarRegular';
+    font-size: 32px;
+  }
+}
+
