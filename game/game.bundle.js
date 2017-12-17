@@ -363,6 +363,8 @@ var Weapons = {
       var _this2 = _possibleConstructorReturn(this, (SimpleShoot.__proto__ || Object.getPrototypeOf(SimpleShoot)).call(this, game, 'SimpleShoot', 'bullet5'));
 
       _this2.dmg = 2;
+      _this2.fireRate = 100;
+      _this2.bulletsPool = 128;
       return _ret2 = _this2, _possibleConstructorReturn(_this2, _ret2);
     }
 
@@ -528,7 +530,7 @@ var menu = function (_Phaser$State) {
         strokeThickness: 5
       });
       logo.anchor.setTo(0.5, 0.5);
-      logo.setShadow(5, 5, 'rgba(0,0,0,0.5)', 10);
+      logo.setShadow(5, 5, 'rgba(0,0,0,0.5)', 15);
       this.add.button(this.game.world.centerX, this.game.world.centerY + 162, 'menu-new-game', newGame).anchor.setTo(0.5, 0.5);
     }
   }]);
@@ -637,7 +639,8 @@ var GameState = function (_Phaser$State) {
       this.gameObjects.player.sprite.body.collideWorldBounds = true;
 
       //  Player physics properties.
-      // this.gameObjects.player.sprite.body.bounce.y = 0;
+      this.gameObjects.player.sprite.body.bounce.y = 10;
+      this.gameObjects.player.sprite.body.bounce.x = 10;
       // this.gameObjects.player.sprite.body.gravity.y = 0;
 
       this.gameControls.cursors = this.input.keyboard.createCursorKeys();
@@ -646,6 +649,8 @@ var GameState = function (_Phaser$State) {
       while (this.enemiesPool.length < 5) {
         var enemy = new Enemies.BasicEnemy(this.game.add.sprite(0, 0, 'enemy1'), 100, this.game);
         this.physics.arcade.enable(enemy.sprite);
+        enemy.sprite.body.bounce.y = 10;
+        enemy.sprite.body.bounce.x = 10;
         this.enemiesPool.push(enemy);
       }
       this.gameObjects.enemies = [];
@@ -698,6 +703,18 @@ var GameState = function (_Phaser$State) {
         if (enemy.attackStage === 2) {
           enemy.attack();
         }
+        if (_this2.checkCollusions(enemy.sprite, _this2.gameObjects.player.sprite)) {
+          enemy.hit(10);
+          _this2.playExplosionAnimation(enemy.sprite);
+          _this2.playExplosionAnimation(enemy.sprite);
+          _this2.playExplosionAnimation(enemy.sprite);
+          _this2.playExplosionAnimation(enemy.sprite);
+          _this2.gameObjects.player.hit(5);
+          _this2.playExplosionAnimation(_this2.gameObjects.player.sprite);
+          _this2.playExplosionAnimation(_this2.gameObjects.player.sprite);
+          _this2.playExplosionAnimation(_this2.gameObjects.player.sprite);
+          _this2.playExplosionAnimation(_this2.gameObjects.player.sprite);
+        }
       });
 
       this.gameObjects.enemies = this.gameObjects.enemies.filter(function (en) {
@@ -728,10 +745,11 @@ var GameState = function (_Phaser$State) {
 
       this.game.physics.arcade.overlap(shooter.weapon, target.sprite, function (targetSprite, bullet) {
         setTimeout(function () {
-          if (bullet.exists) {
+          if (!bullet.registrated && bullet.exists) {
+            bullet.registrated = true;
             target.hit(shooter.weapon.dmg);
+            _this3.playExplosionAnimation(target.sprite);
           }
-          _this3.playExplosionAnimation(bullet.x, bullet.y, target.sprite);
           bullet.kill();
         }, 80);
       });
@@ -750,8 +768,8 @@ var GameState = function (_Phaser$State) {
     }
   }, {
     key: 'playExplosionAnimation',
-    value: function playExplosionAnimation(x, y, object) {
-      var explosion = this.add.sprite(x, y, 'explosion');
+    value: function playExplosionAnimation(object) {
+      var explosion = this.add.sprite(object.x + Math.random() * object.width, object.y + Math.random() * object.height, 'explosion');
       this.physics.arcade.enable(explosion);
       explosion.body.velocity.x = object.body.velocity.x;
       explosion.body.velocity.y = object.body.velocity.y;
@@ -778,6 +796,20 @@ var GameState = function (_Phaser$State) {
         _this4.game.state.add('Game', GameState, true);
       });
       restartButton.anchor.setTo(0.5, 0.5);
+    }
+  }, {
+    key: 'checkCollusions',
+    value: function checkCollusions(obj1, obj2) {
+      if (this.game.physics.arcade.collide(obj1, obj2)) {
+        var sumVX = obj1.body.velocity.x + obj2.body.velocity.x;
+        var sumVY = obj1.body.velocity.y + obj2.body.velocity.y;
+        obj1.body.velocity.x = sumVX / 2;
+        obj2.body.velocity.x = sumVX / 2;
+        obj1.body.velocity.y = sumVY / 2;
+        obj2.body.velocity.y = sumVY / 2;
+        return true;
+      }
+      return false;
     }
   }]);
 
@@ -823,12 +855,15 @@ var Bullet = function (_Phaser$Sprite) {
 
     _this.tracking = false;
     _this.scaleSpeed = 0;
+    _this.registrated = false;
     return _this;
   }
 
   _createClass(Bullet, [{
     key: "fire",
     value: function fire(x, y, angle, speed) {
+      var _this2 = this;
+
       var gx = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
       var gy = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
 
@@ -840,6 +875,9 @@ var Bullet = function (_Phaser$Sprite) {
       this.angle = angle;
 
       this.body.gravity.set(gx, gy);
+      setTimeout(function () {
+        _this2.registrated = false;
+      }, 50);
     }
   }, {
     key: "update",
@@ -986,11 +1024,12 @@ var BasicEnemy = function (_BasicShip) {
     value: function initAttack() {
       var _this2 = this;
 
-      if (this.attackStage === 1) {
+      if (this.attackStage === 1 && this.sprite.exists) {
         this.attackStage = 2;
         (0, _timers.setTimeout)(function () {
           _this2.sprite.body.velocity.y = 50;
           _this2.sprite.body.velocity.x = 150;
+          _this2.currentXVelocity = _this2.sprite.body.velocity.x;
         }, Math.random() * 3000);
       }
     }
@@ -998,11 +1037,12 @@ var BasicEnemy = function (_BasicShip) {
     key: 'attack',
     value: function attack() {
       this.sprite.body.velocity.y = 50;
+      this.sprite.body.velocity.x = this.currentXVelocity;
       if (this.sprite.x > 1200) {
-        this.sprite.body.velocity.x = -150;
+        this.currentXVelocity = -150;
       }
       if (this.sprite.x < 0) {
-        this.sprite.body.velocity.x = 150;
+        this.currentXVelocity = 150;
       }
     }
   }, {
