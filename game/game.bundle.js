@@ -694,6 +694,9 @@ var GameState = function (_Phaser$State) {
       }
 
       if (this.gameObjects.enemies.length === 0) {
+        this.enemiesPool.forEach(function (enemy) {
+          enemy.weapon.fireRate -= 100;
+        });
         this.gameObjects.enemies = this.spawnEnemiesWave(5);
       }
 
