@@ -622,6 +622,7 @@ var GameState = function (_Phaser$State) {
       this.load.spritesheet('explosion', 'assets/explosion.png', 20, 21);
       this.load.image('restart-button', 'assets/restart-button.png');
       this.load.audio('battle-theme', 'assets/music/battle.mp3');
+      this.load.audio('gameover', 'assets/music/gameover.mp3');
       this.load.audio('shot', 'assets/sounds/blaster.mp3');
       this.load.audio('explosion', 'assets/sounds/explosion.mp3');
 
@@ -632,7 +633,9 @@ var GameState = function (_Phaser$State) {
   }, {
     key: 'create',
     value: function create() {
+
       this.game.battleTheme = this.game.add.sound('battle-theme', 0.2, true);
+      this.game.gameoverTheme = this.game.add.sound('gameover', 0.2, false);
       this.game.shotSound = this.game.add.sound('shot', 0.2, false);
       this.game.explosionSound = this.game.add.sound('explosion', 0.2, false);
       this.game.menuTheme.stop();
@@ -673,7 +676,6 @@ var GameState = function (_Phaser$State) {
         this.enemiesPool.push(enemy);
       }
       this.gameObjects.enemies = [];
-
       this.game.battleTheme.play();
     }
   }, {
@@ -688,6 +690,7 @@ var GameState = function (_Phaser$State) {
       if (this.gameObjects.player.checkDeath()) {
         this.showGameOverMessage();
         this.game.battleTheme.stop();
+        this.game.gameoverTheme.play();
       }
 
       if (this.gameObjects.enemies.length === 0) {
@@ -821,6 +824,7 @@ var GameState = function (_Phaser$State) {
       });
       gameOverMessage.anchor.setTo(0.5, 0.5);
       var restartButton = this.add.button(this.game.world.centerX, this.game.world.centerY + 162, 'restart-button', function () {
+        _this4.game.gameoverTheme.stop();
         _this4.game.state.add('Game', GameState, true);
       });
       restartButton.anchor.setTo(0.5, 0.5);
