@@ -127,15 +127,16 @@ a {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  &__play-button {
-    height: 50px;
-    width: 100px;
-    color: white;
-    background-color: #30339d;
-    border: none;
-    font-family: 'PixelarRegular';
-    font-size: 32px;
-  }
+  }  
+}
+.b-play-button {
+  height: 50px;
+  width: 100px;
+  color: white;
+  background-color: #30339d;
+  border: none;
+  font-family: 'PixelarRegular';
+  font-size: 32px;
+  box-shadow: 3px 3px 10px black;
 }
 

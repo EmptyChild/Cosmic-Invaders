@@ -148,7 +148,7 @@ a {
   align-items: center;
 }
 
-.b-section--game-container__play-button {
+.b-play-button {
   height: 50px;
   width: 100px;
   color: white;
@@ -156,6 +156,7 @@ a {
   border: none;
   font-family: 'PixelarRegular';
   font-size: 32px;
+  box-shadow: 3px 3px 10px black;
 }
  
 
