@@ -310,10 +310,11 @@ var Weapon = function (_Phaser$Group) {
 
   function Weapon(game) {
     var weaponName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Weapon';
+    var bulletKey = arguments[2];
 
     var _ret;
 
-    var bulletKey = arguments[2];
+    var shotSound = arguments[3];
 
     _classCallCheck(this, Weapon);
 
@@ -324,6 +325,7 @@ var Weapon = function (_Phaser$Group) {
     _this.fireRate = 100;
     _this.bulletsPool = 64;
     _this.dmg = 5;
+    _this.shotSound = shotSound;
 
     for (var i = 0; i < _this.bulletsPool; i += 1) {
       _this.add(new _bullets2.default(game, bulletKey), true);
@@ -342,6 +344,7 @@ var Weapon = function (_Phaser$Group) {
       var y = source.y + 10;
 
       this.getFirstExists(false).fire(x, y, -90, this.bulletSpeed, 0, 0);
+      this.shotSound.play();
 
       this.nextFire = this.game.time.time + this.fireRate;
     }
@@ -355,15 +358,15 @@ var Weapons = {
   SimpleShoot: function (_Weapon) {
     _inherits(SimpleShoot, _Weapon);
 
-    function SimpleShoot(game) {
+    function SimpleShoot(game, shotSound) {
       var _ret2;
 
       _classCallCheck(this, SimpleShoot);
 
-      var _this2 = _possibleConstructorReturn(this, (SimpleShoot.__proto__ || Object.getPrototypeOf(SimpleShoot)).call(this, game, 'SimpleShoot', 'bullet5'));
+      var _this2 = _possibleConstructorReturn(this, (SimpleShoot.__proto__ || Object.getPrototypeOf(SimpleShoot)).call(this, game, 'SimpleShoot', 'bullet5', shotSound));
 
-      _this2.dmg = 2;
-      _this2.fireRate = 100;
+      _this2.dmg = 6;
+      _this2.fireRate = 300;
       _this2.bulletsPool = 128;
       return _ret2 = _this2, _possibleConstructorReturn(_this2, _ret2);
     }
@@ -384,6 +387,8 @@ var Weapons = {
         this.getFirstExists(false).fire(x1, y1, -90, this.bulletSpeed, 0, 0);
         this.getFirstExists(false).fire(x2, y2, -90, this.bulletSpeed, 0, 0);
 
+        this.shotSound.play();
+
         this.nextFire = this.game.time.time + this.fireRate;
       }
     }]);
@@ -394,12 +399,12 @@ var Weapons = {
   BasicEnemyShoot: function (_Weapon2) {
     _inherits(BasicEnemyShoot, _Weapon2);
 
-    function BasicEnemyShoot(game) {
+    function BasicEnemyShoot(game, shotSound) {
       var _ret3;
 
       _classCallCheck(this, BasicEnemyShoot);
 
-      var _this3 = _possibleConstructorReturn(this, (BasicEnemyShoot.__proto__ || Object.getPrototypeOf(BasicEnemyShoot)).call(this, game, 'BasicEnemyShoot', 'bullet7'));
+      var _this3 = _possibleConstructorReturn(this, (BasicEnemyShoot.__proto__ || Object.getPrototypeOf(BasicEnemyShoot)).call(this, game, 'BasicEnemyShoot', 'bullet7', shotSound));
 
       _this3.bulletSpeed = 300;
       _this3.fireRate = 1900;
@@ -419,6 +424,7 @@ var Weapons = {
 
         this.getFirstExists(false).fire(x, y, 90, this.bulletSpeed, 0, 0);
 
+        this.shotSound.play();
         this.nextFire = this.game.time.time + this.fireRate;
       }
     }]);
@@ -448,6 +454,7 @@ var BasicShip = function () {
   function BasicShip(sprite) {
     var maxHP = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
     var startWeapon = arguments[2];
+    var deathSound = arguments[3];
 
     _classCallCheck(this, BasicShip);
 
@@ -455,6 +462,7 @@ var BasicShip = function () {
     this.maxHP = maxHP;
     this.currentHP = maxHP;
     this.weapon = startWeapon;
+    this.deathSound = deathSound;
   }
 
   _createClass(BasicShip, [{
@@ -466,6 +474,7 @@ var BasicShip = function () {
     key: "checkDeath",
     value: function checkDeath() {
       if (this.currentHP <= 0) {
+        this.deathSound.play();
         this.sprite.kill();
         return true;
       }
@@ -517,6 +526,7 @@ var menu = function (_Phaser$State) {
     value: function preload() {
       this.load.image('menu-back', 'assets/menu-background.jpg');
       this.load.image('menu-new-game', 'assets/menu-new-game-button.png');
+      this.load.audio('menu-theme', 'assets/music/menu.mp3');
     }
   }, {
     key: 'create',
@@ -532,6 +542,8 @@ var menu = function (_Phaser$State) {
       logo.anchor.setTo(0.5, 0.5);
       logo.setShadow(5, 5, 'rgba(0,0,0,0.5)', 15);
       this.add.button(this.game.world.centerX, this.game.world.centerY + 162, 'menu-new-game', newGame).anchor.setTo(0.5, 0.5);
+      this.game.menuTheme = this.game.add.sound('menu-theme', 0.2, true);
+      this.game.menuTheme.play();
     }
   }]);
 
@@ -609,6 +621,9 @@ var GameState = function (_Phaser$State) {
       this.load.image('enemy1', 'assets/enemies/basic-enemy-ship1.png');
       this.load.spritesheet('explosion', 'assets/explosion.png', 20, 21);
       this.load.image('restart-button', 'assets/restart-button.png');
+      this.load.audio('battle-theme', 'assets/music/battle.mp3');
+      this.load.audio('shot', 'assets/sounds/blaster.mp3');
+      this.load.audio('explosion', 'assets/sounds/explosion.mp3');
 
       for (var i = 2; i <= 11; i += 1) {
         this.load.image('bullet' + i, 'assets/bullets/bullet' + i + '.png');
@@ -617,6 +632,10 @@ var GameState = function (_Phaser$State) {
   }, {
     key: 'create',
     value: function create() {
+      this.game.battleTheme = this.game.add.sound('battle-theme', 0.2, true);
+      this.game.shotSound = this.game.add.sound('shot', 0.2, false);
+      this.game.explosionSound = this.game.add.sound('explosion', 0.2, false);
+      this.game.menuTheme.stop();
       //  We're going to be using physics, so enable the Arcade Physics system
       this.physics.startSystem(Phaser.Physics.ARCADE);
       //  A simple background for our game
@@ -633,7 +652,7 @@ var GameState = function (_Phaser$State) {
       this.physics.arcade.enable(this.gameObjects.explosion);
       this.gameObjects.explosion.animations.add('hit', [1, 2, 3, 4, 5, 6, 7, 8], 30, true);
       // The player and its settings
-      this.gameObjects.player = new _player2.default(this.add.sprite(this.game.world.centerX - 37.5, this.game.world.height - 100, 'falcon'), this.gameObjects.hpText, 100, new _weapons2.default.SimpleShoot(this.game));
+      this.gameObjects.player = new _player2.default(this.add.sprite(this.game.world.centerX - 37.5, this.game.world.height - 100, 'falcon'), this.gameObjects.hpText, 100, new _weapons2.default.SimpleShoot(this.game, this.game.shotSound), this.game.explosionSound);
       // //  We need to enable physics on the player
       this.physics.arcade.enable(this.gameObjects.player.sprite);
       this.gameObjects.player.sprite.body.collideWorldBounds = true;
@@ -647,13 +666,15 @@ var GameState = function (_Phaser$State) {
       this.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
       this.enemiesPool = [];
       while (this.enemiesPool.length < 5) {
-        var enemy = new Enemies.BasicEnemy(this.game.add.sprite(0, 0, 'enemy1'), 100, this.game);
+        var enemy = new Enemies.BasicEnemy(this.game.add.sprite(0, 0, 'enemy1'), 100, this.game, this.game.shotSound, this.game.explosionSound);
         this.physics.arcade.enable(enemy.sprite);
         enemy.sprite.body.bounce.y = 10;
         enemy.sprite.body.bounce.x = 10;
         this.enemiesPool.push(enemy);
       }
       this.gameObjects.enemies = [];
+
+      this.game.battleTheme.play();
     }
   }, {
     key: 'update',
@@ -666,6 +687,7 @@ var GameState = function (_Phaser$State) {
       this.gameObjects.player.updateHPPerformance();
       if (this.gameObjects.player.checkDeath()) {
         this.showGameOverMessage();
+        this.game.battleTheme.stop();
       }
 
       if (this.gameObjects.enemies.length === 0) {
@@ -714,6 +736,9 @@ var GameState = function (_Phaser$State) {
           _this2.playExplosionAnimation(_this2.gameObjects.player.sprite);
           _this2.playExplosionAnimation(_this2.gameObjects.player.sprite);
           _this2.playExplosionAnimation(_this2.gameObjects.player.sprite);
+          if (!_this2.game.explosionSound.isPlaying) {
+            _this2.game.explosionSound.play();
+          }
         }
       });
 
@@ -729,13 +754,15 @@ var GameState = function (_Phaser$State) {
       if (this.gameControls.cursors.up.isDown) {
         this.gameObjects.player.sprite.body.velocity.y = -constants.PLAYERS_VELOCITY;
       }
-
       if (this.gameControls.cursors.down.isDown) {
         this.gameObjects.player.sprite.body.velocity.y = constants.PLAYERS_VELOCITY;
       }
 
       if (this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) && this.gameObjects.player.sprite.exists) {
         this.gameObjects.player.weapon.fire(this.gameObjects.player.sprite);
+        if (!this.game.shotSound.isPlaying) {
+          // this.game.shotSound.play();
+        }
       }
     }
   }, {
@@ -749,6 +776,7 @@ var GameState = function (_Phaser$State) {
             bullet.registrated = true;
             target.hit(shooter.weapon.dmg);
             _this3.playExplosionAnimation(target.sprite);
+            _this3.game.explosionSound.play();
           }
           bullet.kill();
         }, 80);
@@ -769,7 +797,7 @@ var GameState = function (_Phaser$State) {
   }, {
     key: 'playExplosionAnimation',
     value: function playExplosionAnimation(object) {
-      var explosion = this.add.sprite(object.x + Math.random() * object.width, object.y + Math.random() * object.height, 'explosion');
+      var explosion = this.add.sprite(object.x + Math.random() * object.width - 20, object.y + Math.random() * object.height - 20, 'explosion');
       this.physics.arcade.enable(explosion);
       explosion.body.velocity.x = object.body.velocity.x;
       explosion.body.velocity.y = object.body.velocity.y;
@@ -929,10 +957,11 @@ var Player = function (_BasicShip) {
   function Player(sprite, HPStatusElement) {
     var maxHP = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 100;
     var startWeapon = arguments[3];
+    var deathSound = arguments[4];
 
     _classCallCheck(this, Player);
 
-    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, sprite, maxHP, startWeapon));
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, sprite, maxHP, startWeapon, deathSound));
 
     _this.HPView = HPStatusElement;
     return _this;
@@ -951,7 +980,8 @@ var Player = function (_BasicShip) {
   }, {
     key: 'checkDeath',
     value: function checkDeath() {
-      if (this.currentHP <= 0) {
+      if (this.currentHP <= 0 && this.sprite.exists) {
+        this.deathSound.play();
         this.sprite.kill();
         return true;
       }
@@ -1002,10 +1032,12 @@ var BasicEnemy = function (_BasicShip) {
   function BasicEnemy(sprite) {
     var maxHP = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
     var game = arguments[2];
+    var shotSound = arguments[3];
+    var deathSound = arguments[4];
 
     _classCallCheck(this, BasicEnemy);
 
-    var _this = _possibleConstructorReturn(this, (BasicEnemy.__proto__ || Object.getPrototypeOf(BasicEnemy)).call(this, sprite, maxHP, new _weapons2.default.BasicEnemyShoot(game)));
+    var _this = _possibleConstructorReturn(this, (BasicEnemy.__proto__ || Object.getPrototypeOf(BasicEnemy)).call(this, sprite, maxHP, new _weapons2.default.BasicEnemyShoot(game, shotSound), deathSound));
 
     _this.sprite.exists = false;
     _this.attackStage = 1;
@@ -1049,6 +1081,7 @@ var BasicEnemy = function (_BasicShip) {
     key: 'checkDeath',
     value: function checkDeath() {
       if (this.currentHP <= 0) {
+        this.deathSound.play();
         this.sprite.kill();
         this.attackStage = 0;
         return true;
