@@ -158,6 +158,8 @@ a {
   font-size: 32px;
   box-shadow: 3px 3px 10px black;
 }
- 
 
- /*# sourceMappingURL= styles.css.map */
+.technologies-headling {
+  text-align: center;
+}
+/*# sourceMappingURL=styles.css.map */
